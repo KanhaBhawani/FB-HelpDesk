@@ -1,69 +1,40 @@
-// app.js
+//server main file
 const express = require("express");
-const bodyParser = require("body-parser");
-const dotenv = require("dotenv");
-const connectDB = require("./config/DB");
+const cors    = require("cors");
+// Connecting Database
+const { mongoConnect } = require("./utils/database");
+const router  = require("./routes/router");
+const io      = require("./utils/sockets");
 
-dotenv.config();
-connectDB();
+//importing environment variables
+require('dotenv').config()
+
 const app = express();
 
-// Middleware
-app.use(bodyParser.json());
-app.get("/", (req, res) => {
-  res.send("hello world");
-});
-app.get("/hello", (req, res) => {
-  res.send("hello..");
-});
-// Routes
-const authRoutes = require("./routes/authRoutes");
-const pageRoutes = require("./routes/pageRoutes");
-const messageRoutes = require("./routes/messageRoutes");
-const abcRoutes = require("./routes/abcRoutes");
-app.use("/api/auth", authRoutes);
-app.use("/api/page", pageRoutes);
-app.use("/api/message", messageRoutes);
-app.use("/api/abc", abcRoutes);
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
-app.get("/webhook", (req, res) => {
-  const mode = req.query["hub.mode"];
-  const token = req.query["hub.verify_token"];
-  const challenge = req.query["hub.challenge"];
+// api the add-on before every route to separate from frontend routes
 
-  if (mode && token === "abcdefgh") {
-    res.status(200).send(challenge);
-  } else {
-    res.sendStatus(403);
-  }
-});
+app.use("/api", router);
 
-app.post("/webhook", (req, res) => {
-  const body = req.body;
-  console.log(body);
+mongoConnect((client) => {
+	//.Port to suit the deployment server and 3000 for local server
+	const serv = app.listen(process.env.PORT || 5000, (err) => {
+		if (err) {
+			console.log(err);
+			process.exit(0);
+		}
 
-  if (body.object === "page") {
-    body.entry.forEach((entry) => {
-      if (entry.messaging) {
-        console.log("hehehe");
-        let webhook_event = entry.messaging[0];
-        console.log(webhook_event.recipient.id);
-        io.emit("/new_message", webhook_event);
-      } else {
-        console.log(entry.changes);
-        console.log("bahar kaaaa");
-      }
-
-      // Handle the webhook event (e.g., send response, update database)
-    });
-
-    res.status(200).send("EVENT_RECEIVED");
-  } else {
-    res.sendStatus(404);
-  }
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+		io.attach(serv, {
+			cors: {
+				//Local host Url
+				origin: "http://localhost:5000",
+				methods: ["GET", "POST"],
+			},
+		});
+		//logging in server console
+		console.log("Server is Listening at Port:5000!");
+	});
 });
