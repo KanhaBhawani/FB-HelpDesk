@@ -4,8 +4,8 @@ const axios = require("axios");
 
 exports.conversations = async (req, res) => {
   try {
-    const { PSID, access_token } = req.body;
-    console.log(PSID, access_token);
+    const { PSID, access_token } = req.body; // page id
+    // console.log(PSID, access_token);  
 
     const url = `https://graph.facebook.com/v19.0/${PSID}/conversations?fields=participants,messages{id,message}&access_token=${access_token}`;
 
