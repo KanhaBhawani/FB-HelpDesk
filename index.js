@@ -45,10 +45,11 @@ app.post("/webhook", (req, res) => {
   if (body.object === "page") {
     body.entry.forEach((entry) => {
       if (entry.messaging) {
+        console.log("hehehe");
         let webhook_event = entry.messaging[0];
         console.log(webhook_event.recipient.id);
-        // io.emit("/new_message", webhook_event);
-      } else console.log(entry.changes);
+        io.emit("/new_message", webhook_event);
+      } else {console.log(entry.changes);}
 
       // Handle the webhook event (e.g., send response, update database)
     });
