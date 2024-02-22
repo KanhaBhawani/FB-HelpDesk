@@ -49,7 +49,10 @@ app.post("/webhook", (req, res) => {
         let webhook_event = entry.messaging[0];
         console.log(webhook_event.recipient.id);
         io.emit("/new_message", webhook_event);
-      } else {console.log(entry.changes);}
+      } else {
+        console.log(entry.changes);
+        console.log("bahar kaaaa");
+      }
 
       // Handle the webhook event (e.g., send response, update database)
     });
