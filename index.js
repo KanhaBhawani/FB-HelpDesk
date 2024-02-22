@@ -13,6 +13,9 @@ app.use(bodyParser.json());
 app.get("/", (req, res) => {
   res.send("hello world");
 });
+app.get('/hello',(req,res)=>{
+  res.send('hello..')
+})
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const pageRoutes = require('./routes/pageRoutes');
